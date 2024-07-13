@@ -3,12 +3,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const playerForm = document.getElementById('playerForm');
     const playerList = document.getElementById('playerList');
     const generateTeamsButton = document.getElementById('generateTeams');
-    const saveDataButton = document.getElementById('saveData');
+    const fileInput = document.getElementById('fileInput');
     const teamsDiv = document.getElementById('teams');
 
-    let players = loadPlayerData();
-
-    displayPlayers();
+    let players = [];
 
     playerForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -21,18 +19,34 @@ document.addEventListener('DOMContentLoaded', () => {
         players.push(player);
         
         displayPlayers();
-        savePlayerData(players);
 
         playerForm.reset();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const json = XLSX.utils.sheet_to_json(worksheet);
+                players = json.map(player => ({
+                    name: player.Name,
+                    position: player.Position,
+                    skill: player.Skill
+                }));
+                displayPlayers();
+            };
+            reader.readAsArrayBuffer(file);
+        }
     });
 
     generateTeamsButton.addEventListener('click', () => {
         const teams = generateTeams(players);
         displayTeams(teams);
-    });
-
-    saveDataButton.addEventListener('click', () => {
-        saveToFile(players);
     });
 
     function displayPlayers() {
@@ -45,7 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function generateTeams(players) {
-        // Simple logic to split players into two teams based on skill
         const sortedPlayers = [...players].sort((a, b) => b.skill - a.skill);
         const teamA = [];
         const teamB = [];
@@ -82,26 +95,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
         teamsDiv.appendChild(teamA);
         teamsDiv.appendChild(teamB);
-    }
-
-    function savePlayerData(players) {
-        localStorage.setItem('players', JSON.stringify(players));
-    }
-
-    function loadPlayerData() {
-        const playersData = localStorage.getItem('players');
-        return playersData ? JSON.parse(playersData) : [];
-    }
-
-    function saveToFile(players) {
-        const blob = new Blob([JSON.stringify(players, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'players.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
     }
 });

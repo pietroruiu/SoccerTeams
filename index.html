@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Football Player Manager</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.17.0/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -15,13 +16,11 @@
             <input type="number" id="skill" placeholder="Skill Level" required>
             <button type="submit">Add Player</button>
         </form>
+        <input type="file" id="fileInput" accept=".xlsx, .xls">
         <ul id="playerList"></ul>
         <button id="generateTeams">Generate Teams</button>
-        <button id="saveData">Save Data</button>
         <div id="teams"></div>
     </div>
     <script src="script.js"></script>
 </body>
 </html>
-
-
