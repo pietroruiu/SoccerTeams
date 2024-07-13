@@ -4,23 +4,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let players = [];
 
-    fetch('players_example.xlsx') // Assicurati che il file sia nella stessa directory
-        .then(response => response.arrayBuffer())
-        .then(data => {
-            const workbook = XLSX.read(data, { type: 'array' });
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
-            const playersArray = XLSX.utils.sheet_to_json(worksheet);
+    function loadExcelFile() {
+        fetch('players_example.xlsx')  // Assicurati che il file sia nella stessa directory
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.arrayBuffer();
+            })
+            .then(data => {
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const playersArray = XLSX.utils.sheet_to_json(worksheet);
 
-            players = playersArray.map(player => ({
-                name: player.Name,
-                position: player.Position,
-                skill: parseInt(player.Skill)
-            }));
+                players = playersArray.map(player => ({
+                    name: player.Name,
+                    position: player.Position,
+                    skill: parseInt(player.Skill, 10)
+                }));
 
-            displayPlayers();
-        })
-        .catch(error => console.error(error));
+                displayPlayers();
+                displayTeams(generateTeams(players));
+            })
+            .catch(error => console.error('Error loading or parsing file:', error));
+    }
 
     function displayPlayers() {
         playerList.innerHTML = '';
@@ -69,4 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
         teamsDiv.appendChild(teamA);
         teamsDiv.appendChild(teamB);
     }
+
+    loadExcelFile();
 });
