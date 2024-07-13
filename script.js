@@ -3,9 +3,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const playerForm = document.getElementById('playerForm');
     const playerList = document.getElementById('playerList');
     const generateTeamsButton = document.getElementById('generateTeams');
+    const saveDataButton = document.getElementById('saveData');
     const teamsDiv = document.getElementById('teams');
 
-    let players = [];
+    let players = loadPlayerData();
+
+    displayPlayers();
 
     playerForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -18,7 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
         players.push(player);
         
         displayPlayers();
-        
+        savePlayerData(players);
+
         playerForm.reset();
     });
 
@@ -27,9 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
         displayTeams(teams);
     });
 
+    saveDataButton.addEventListener('click', () => {
+        saveToFile(players);
+    });
+
     function displayPlayers() {
         playerList.innerHTML = '';
-        players.forEach((player, index) => {
+        players.forEach((player) => {
             const li = document.createElement('li');
             li.textContent = `Name: ${player.name}, Position: ${player.position}, Skill: ${player.skill}`;
             playerList.appendChild(li);
@@ -74,5 +82,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         teamsDiv.appendChild(teamA);
         teamsDiv.appendChild(teamB);
+    }
+
+    function savePlayerData(players) {
+        localStorage.setItem('players', JSON.stringify(players));
+    }
+
+    function loadPlayerData() {
+        const playersData = localStorage.getItem('players');
+        return playersData ? JSON.parse(playersData) : [];
+    }
+
+    function saveToFile(players) {
+        const blob = new Blob([JSON.stringify(players, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'players.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 });
