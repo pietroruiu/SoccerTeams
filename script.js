@@ -1,39 +1,26 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const playerForm = document.getElementById('playerForm');
     const playerList = document.getElementById('playerList');
-    const generateTeamsButton = document.getElementById('generateTeams');
     const teamsDiv = document.getElementById('teams');
-    const fileInput = document.getElementById('fileInput');
-    const loadFileButton = document.getElementById('loadFileButton');
 
     let players = [];
 
-    loadFileButton.addEventListener('click', () => {
-        fileInput.click(); // Simulate click on file input
-    });
-
-    fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const data = event.target.result;
-            const workbook = XLSX.read(data, { type: 'binary' });
+    fetch('players_example.xlsx') // Assicurati che il file sia nella stessa directory
+        .then(response => response.arrayBuffer())
+        .then(data => {
+            const workbook = XLSX.read(data, { type: 'array' });
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
-            const playersArray = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            const playersArray = XLSX.utils.sheet_to_json(worksheet);
 
-            players = playersArray.slice(1).map(row => ({
-                name: row[0],
-                position: row[1],
-                skill: parseInt(row[2])
+            players = playersArray.map(player => ({
+                name: player.Name,
+                position: player.Position,
+                skill: parseInt(player.Skill)
             }));
 
             displayPlayers();
-        };
-        reader.readAsBinaryString(file);
-    });
+        })
+        .catch(error => console.error(error));
 
     function displayPlayers() {
         playerList.innerHTML = '';
@@ -43,26 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
             playerList.appendChild(li);
         });
     }
-
-    playerForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-
-        const name = document.getElementById('name').value;
-        const position = document.getElementById('position').value;
-        const skill = document.getElementById('skill').value;
-
-        const player = { name, position, skill: parseInt(skill) };
-        players.push(player);
-
-        displayPlayers();
-
-        playerForm.reset();
-    });
-
-    generateTeamsButton.addEventListener('click', () => {
-        const teams = generateTeams(players);
-        displayTeams(teams);
-    });
 
     function generateTeams(players) {
         const sortedPlayers = [...players].sort((a, b) => b.skill - a.skill);
