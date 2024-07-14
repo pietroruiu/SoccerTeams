@@ -24,8 +24,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     speed: parseInt(player.Velocità, 10),
                     shooting: parseInt(player.Tiro, 10),
                     goalie: parseInt(player.Porta, 10),
-                    presence: parseInt(player.Presenza, 10) === 1
+                    presence: true // Default to true; will be overridden by presence data
                 }));
+
+                // Sovrascrivi i dati di presenza con quelli salvati in localStorage
+                const savedPlayers = JSON.parse(localStorage.getItem('players'));
+                if (savedPlayers) {
+                    players = players.map(player => {
+                        const savedPlayer = savedPlayers.find(p => p.name === player.name);
+                        return savedPlayer ? { ...player, presence: savedPlayer.presence } : player;
+                    });
+                }
 
                 displayPlayers();
             })
@@ -37,50 +46,58 @@ document.addEventListener('DOMContentLoaded', () => {
         players.forEach(player => {
             player.selected = false;
         });
-    
+
         // Filtra i giocatori presenti e non ancora selezionati
         const filteredPlayers = players.filter(player => player.presence && !player.selected);
-    
+
         // Se ci sono meno di 10 giocatori disponibili, non è possibile formare due squadre da 5 giocatori ciascuna
         if (filteredPlayers.length < 10) {
             console.error('Not enough players available to form two teams.');
+            alert("Seleziona almeno 10 giocatori!");
             return;
         }
-    
+
+        if (filteredPlayers.length > 10) {
+            console.error('Too many players selected!');
+            alert("Hai selezionato troppi giocatori!");
+            return;
+        }
+
         // Filtra i giocatori con skill di 1 in porta
         const goaliesWithSkill1 = filteredPlayers.filter(player => player.goalie === 1);
-    
+
         // Seleziona almeno un giocatore con skill 1 in porta per ciascuna squadra
         let goalieSkill1A = goaliesWithSkill1.find(player => !player.selected);
         let goalieSkill1B = goaliesWithSkill1.find(player => !player.selected && player !== goalieSkill1A);
-    
+
         // Se non ci sono sufficienti giocatori con skill 1 in porta, esce con un messaggio di errore
         if (!goalieSkill1A || !goalieSkill1B) {
             console.error('Not enough goalies with skill 1 available to form two teams.');
+            alert("Seleziona almeno due portieri!");
             return;
         }
-    
+
         // Assegna un portiere con skill 1 a ciascuna squadra
         goalieSkill1A.selected = true;
         goalieSkill1B.selected = true;
         let teamA = [goalieSkill1A];
         let teamB = [goalieSkill1B];
-    
+
         // Rimuovi i giocatori con skill 1 in porta dai giocatori disponibili
         filteredPlayers.splice(filteredPlayers.indexOf(goalieSkill1A), 1);
         filteredPlayers.splice(filteredPlayers.indexOf(goalieSkill1B), 1);
-    
+
         // Ordina i giocatori disponibili in modo casuale
         filteredPlayers.sort(() => Math.random() - 0.5);
-    
+
         // Distribuisci i giocatori nei due team
         let sumA = 0;
         let sumB = 0;
         let currentPlayer;
-    
+
         while (teamA.length < 5 || teamB.length < 5) {
             currentPlayer = filteredPlayers.pop();
-    
+
             if (currentPlayer) {
                 if (teamA.length < 5) {
                     teamA.push(currentPlayer);
@@ -95,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 break; // Se non ci sono più giocatori disponibili, esci dal ciclo
             }
         }
-    
+
         displayTeams({ teamA, teamB });
     }
 
@@ -112,15 +129,9 @@ document.addEventListener('DOMContentLoaded', () => {
         teamAHeader.textContent = 'Team A';
         teamAContainer.appendChild(teamAHeader);
 
-        // teams.teamA.forEach(player => {
-        //     const p = document.createElement('p');
-        //     p.textContent = `Name: ${player.name}, Defense: ${player.defense}, Attack: ${player.attack}, Midfield: ${player.midfield}, Goalie: ${player.goalie}, Speed: ${player.speed}, Shooting: ${player.shooting}`;
-        //     teamAContainer.appendChild(p);
-        // });
-
         teams.teamA.forEach(player => {
             const p = document.createElement('p');
-            p.textContent = `${player.name}`;//, Defense: ${player.defense}, Attack: ${player.attack}, Midfield: ${player.midfield}, Goalie: ${player.goalie}, Speed: ${player.speed}, Shooting: ${player.shooting}`;
+            p.textContent = `${player.name}`;
             teamAContainer.appendChild(p);
         });
 
@@ -128,21 +139,102 @@ document.addEventListener('DOMContentLoaded', () => {
         teamBHeader.textContent = 'Team B';
         teamBContainer.appendChild(teamBHeader);
 
-        // teams.teamB.forEach(player => {
-        //     const p = document.createElement('p');
-        //     p.textContent = `Name: ${player.name}, Defense: ${player.defense}, Attack: ${player.attack}, Midfield: ${player.midfield}, Goalie: ${player.goalie}, Speed: ${player.speed}, Shooting: ${player.shooting}`;
-        //     teamBContainer.appendChild(p);
-        // });
-
         teams.teamB.forEach(player => {
             const p = document.createElement('p');
-            p.textContent = `${player.name}`;//, Defense: ${player.defense}, Attack: ${player.attack}, Midfield: ${player.midfield}, Goalie: ${player.goalie}, Speed: ${player.speed}, Shooting: ${player.shooting}`;
+            p.textContent = `${player.name}`;
             teamBContainer.appendChild(p);
         });
 
         teamsDiv.appendChild(teamAContainer);
         teamsDiv.appendChild(teamBContainer);
     }
+
+    function displayPlayers() {
+        const presenceList = document.getElementById('presenceList');
+        presenceList.innerHTML = '';
+    
+        players.forEach(player => {
+            const listItem = document.createElement('li');
+            listItem.textContent = player.name;
+
+            // Container per la presenza
+            const presenceContainer = document.createElement('div');
+            presenceContainer.className = 'switch-container';
+
+            // Etichetta per la presenza
+            const presenceLabel = document.createElement('label');
+            presenceLabel.textContent = 'Presente';
+            presenceLabel.className = 'switch-label';
+            presenceLabel.setAttribute('for', `presenceSwitch-${player.name}`);
+
+            // Slider per la presenza
+            const presenceSlider = document.createElement('input');
+            presenceSlider.type = 'range';
+            presenceSlider.min = '0';
+            presenceSlider.max = '1';
+            presenceSlider.step = '1';
+            presenceSlider.value = player.presence ? '1' : '0';
+            presenceSlider.className = 'presence-slider';
+
+            // Span per visualizzare lo stato
+            const presenceStatus = document.createElement('span');
+            presenceStatus.textContent = player.presence ? 'On' : 'Off';
+            presenceStatus.className = 'presence-status';
+
+            presenceSlider.addEventListener('input', (event) => {
+                player.presence = event.target.value === '1';
+                presenceStatus.textContent = player.presence ? 'On' : 'Off';
+                localStorage.setItem('players', JSON.stringify(players));
+            });
+
+            // Aggiungi tutto al container della presenza
+            presenceContainer.appendChild(presenceLabel);
+            presenceContainer.appendChild(presenceSlider);
+            presenceContainer.appendChild(presenceStatus);
+            listItem.appendChild(presenceContainer);
+
+    
+            // Container per il portiere (goalie)
+            const goalieContainer = document.createElement('div');
+            goalieContainer.className = 'switch-container';
+
+            // Etichetta per il portiere (goalie)
+            const goalieLabel = document.createElement('label');
+            goalieLabel.textContent = 'Portiere';
+            goalieLabel.className = 'switch-label';
+            goalieLabel.setAttribute('for', `goalieSwitch-${player.name}`);
+
+            // Slider per il portiere (goalie)
+            const goalieSlider = document.createElement('input');
+            goalieSlider.type = 'range';
+            goalieSlider.min = '0';
+            goalieSlider.max = '1';
+            goalieSlider.step = '1';
+            goalieSlider.value = player.goalie === 1 ? '1' : '0';
+            goalieSlider.className = 'goalie-slider';
+
+            // Span per visualizzare lo stato
+            const goalieStatus = document.createElement('span');
+            goalieStatus.textContent = player.goalie === 1 ? 'On' : 'Off';
+            goalieStatus.className = 'goalie-status';
+
+            goalieSlider.addEventListener('input', (event) => {
+                player.goalie = event.target.value === '1' ? 1 : 0;
+                goalieStatus.textContent = player.goalie === 1 ? 'On' : 'Off';
+                localStorage.setItem('players', JSON.stringify(players));
+            });
+
+            // Aggiungi tutto al container del portiere (goalie)
+            goalieContainer.appendChild(goalieLabel);
+            goalieContainer.appendChild(goalieSlider);
+            goalieContainer.appendChild(goalieStatus);
+            listItem.appendChild(goalieContainer);
+                
+            // Aggiungi listItem alla lista principale
+            presenceList.appendChild(listItem);
+        });
+    }
+    
 
     loadPlayers();
 

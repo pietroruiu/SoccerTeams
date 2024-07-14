@@ -38,9 +38,6 @@
     <div class="container">
         <h2>Players</h2>
 
-        <!-- Navigation Button -->
-        <button id="navigateToRadar">Go to Teams Page</button>
-
         <label for="playerSelect">Select a Player:</label>
         <select id="playerSelect">
             <option value="">-- Select a player --</option>
@@ -52,6 +49,9 @@
             <h3>Player Skills Radar Chart</h3>
             <canvas id="radarChart"></canvas>
         </div>
+
+        <!-- Navigation Button -->
+        <button id="navigateToTeams">Go to Teams Page</button>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
@@ -59,14 +59,9 @@
     <script src="players.js"></script>
     <script>
         // Navigation to Radar Chart Page
-        document.getElementById('navigateToRadar').addEventListener('click', () => {
+        document.getElementById('navigateToTeams').addEventListener('click', () => {
             window.location.href = 'teams.html'; // Assuming the radar chart page is named radar_chart.html
         });
-
-        // Your existing team generation script
-        // document.addEventListener('DOMContentLoaded', () => {
-        //     // Your existing code
-        // });
     </script>
 </body>
 </html>

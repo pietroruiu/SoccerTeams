@@ -1,8 +1,18 @@
+// players.js
+
+// Sample player data
+let players = [];
+
+// Load player data from localStorage if available
+const savedPlayers = JSON.parse(localStorage.getItem('players'));
+if (savedPlayers) {
+    players = savedPlayers;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const playerSelect = document.getElementById('playerSelect');
     const radarContainer = document.getElementById('radarContainer');
     const radarCtx = document.getElementById('radarChart').getContext('2d');
-    let players = [];
 
     function loadPlayers() {
         fetch('players_example.xlsx')
@@ -24,8 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     attack: parseInt(player.Attacco, 10),
                     midfield: parseInt(player.Centrocampo, 10),
                     speed: parseInt(player.Velocità, 10),
-                    shooting: parseInt(player.Tiro, 10)
+                    shooting: parseInt(player.Tiro, 10),
+                    present: true // Default to true; modify as needed
                 }));
+
+                // Save the loaded players to localStorage
+                localStorage.setItem('players', JSON.stringify(players));
 
                 populatePlayerSelect();
             })
@@ -34,13 +48,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function populatePlayerSelect() {
         players.forEach((player, index) => {
-            const option = document.createElement('option');
-            option.value = index.toString(); // Salva l'indice del giocatore come valore dell'opzione
-            option.textContent = player.name;
-            playerSelect.appendChild(option);
+            if (player.present) { // Only add players who are present
+                const option = document.createElement('option');
+                option.value = index.toString(); // Save the player's index as the option value
+                option.textContent = player.name;
+                playerSelect.appendChild(option);
+            }
         });
 
-        // Aggiungi event listener per il cambio nel menu a tendina
+        // Add event listener for dropdown menu change
         playerSelect.addEventListener('change', (event) => {
             const playerIndex = parseInt(event.target.value, 10);
             if (!isNaN(playerIndex)) {
@@ -85,14 +101,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        radarContainer.style.display = 'block'; // Mostra il container del diagramma radar se nascosto
+        radarContainer.style.display = 'block'; // Show the radar chart container if hidden
 
-        // Distruggi il diagramma esistente se già presente
+        // Destroy the existing chart if it already exists
         if (window.playerRadarChart) {
             window.playerRadarChart.destroy();
         }
 
-        // Crea un nuovo diagramma radar
+        // Create a new radar chart
         window.playerRadarChart = new Chart(radarCtx, {
             type: 'radar',
             data: radarData,
@@ -101,11 +117,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function clearRadarChart() {
-        radarContainer.style.display = 'none'; // Nascondi il container del diagramma radar
+        radarContainer.style.display = 'none'; // Hide the radar chart container
         if (window.playerRadarChart) {
-            window.playerRadarChart.destroy(); // Distruggi il diagramma radar se esiste
+            window.playerRadarChart.destroy(); // Destroy the radar chart if it exists
         }
     }
 
-    loadPlayers();
+    loadPlayers(); // Load players from Excel file
 });
