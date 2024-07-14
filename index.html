@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Generator</title>
+    <title>Team Generator - Players</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,12 +14,6 @@
             display: grid;
             grid-template-columns: 1fr;
             gap: 20px;
-        }
-
-        .player-form {
-            background-color: #f0f0f0;
-            padding: 15px;
-            border-radius: 8px;
         }
 
         .player-list {
@@ -34,35 +28,45 @@
             border-radius: 4px;
         }
 
-        .teams-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .team {
-            background-color: #f0f0f0;
-            padding: 15px;
-            border-radius: 8px;
+        .radar-chart-container {
+            max-width: 400px;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div>
-            <h2>Players</h2>
-            <ul id="playerList" class="player-list"></ul>
-        </div>
+        <h2>Players</h2>
 
-        <button id="generateTeams">Generate Teams</button>
+        <!-- Navigation Button -->
+        <button id="navigateToRadar">Go to Teams Page</button>
 
-        <div id="teams" class="teams-container">
-            <div id="teamA" class="team"></div>
-            <div id="teamB" class="team"></div>
+        <label for="playerSelect">Select a Player:</label>
+        <select id="playerSelect">
+            <option value="">-- Select a player --</option>
+        </select>
+
+        <ul id="playerList" class="player-list"></ul>
+
+        <div class="radar-chart-container" id="radarContainer" style="display: none;">
+            <h3>Player Skills Radar Chart</h3>
+            <canvas id="radarChart"></canvas>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
-    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="players.js"></script>
+    <script>
+        // Navigation to Radar Chart Page
+        document.getElementById('navigateToRadar').addEventListener('click', () => {
+            window.location.href = 'teams.html'; // Assuming the radar chart page is named radar_chart.html
+        });
+
+        // Your existing team generation script
+        // document.addEventListener('DOMContentLoaded', () => {
+        //     // Your existing code
+        // });
+    </script>
 </body>
 </html>
