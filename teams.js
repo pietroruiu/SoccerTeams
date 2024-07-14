@@ -154,88 +154,85 @@ document.addEventListener('DOMContentLoaded', () => {
         presenceList.innerHTML = '';
     
         players.forEach(player => {
-            const listItem = document.createElement('li');
-            listItem.textContent = player.name;
-
             // Container per la presenza
             const presenceContainer = document.createElement('div');
             presenceContainer.className = 'switch-container';
-
+    
             // Etichetta per la presenza
             const presenceLabel = document.createElement('label');
             presenceLabel.textContent = 'Presente';
             presenceLabel.className = 'switch-label';
             presenceLabel.setAttribute('for', `presenceSwitch-${player.name}`);
-
+    
             // Slider per la presenza
-            const presenceSlider = document.createElement('input');
-            presenceSlider.type = 'range';
-            presenceSlider.min = '0';
-            presenceSlider.max = '1';
-            presenceSlider.step = '1';
-            presenceSlider.value = player.presence ? '1' : '0';
-            presenceSlider.className = 'presence-slider';
-
-            // Span per visualizzare lo stato
-            const presenceStatus = document.createElement('span');
-            presenceStatus.textContent = player.presence ? 'On' : 'Off';
-            presenceStatus.className = 'presence-status';
-
-            presenceSlider.addEventListener('input', (event) => {
-                player.presence = event.target.value === '1';
-                presenceStatus.textContent = player.presence ? 'On' : 'Off';
+            const presenceSlider = document.createElement('label');
+            presenceSlider.className = 'switch';
+    
+            const presenceInput = document.createElement('input');
+            presenceInput.type = 'checkbox';
+            presenceInput.id = `presenceSwitch-${player.name}`;
+            presenceInput.checked = player.presence;
+            presenceInput.className = 'slider';
+    
+            const presenceSpan = document.createElement('span');
+            presenceSpan.className = 'slider';
+    
+            presenceSlider.appendChild(presenceInput);
+            presenceSlider.appendChild(presenceSpan);
+    
+            presenceInput.addEventListener('change', (event) => {
+                player.presence = event.target.checked;
                 localStorage.setItem('players', JSON.stringify(players));
             });
-
+    
             // Aggiungi tutto al container della presenza
             presenceContainer.appendChild(presenceLabel);
             presenceContainer.appendChild(presenceSlider);
-            presenceContainer.appendChild(presenceStatus);
-            listItem.appendChild(presenceContainer);
-
     
             // Container per il portiere (goalie)
             const goalieContainer = document.createElement('div');
             goalieContainer.className = 'switch-container';
-
+    
             // Etichetta per il portiere (goalie)
             const goalieLabel = document.createElement('label');
             goalieLabel.textContent = 'Portiere';
             goalieLabel.className = 'switch-label';
             goalieLabel.setAttribute('for', `goalieSwitch-${player.name}`);
-
+    
             // Slider per il portiere (goalie)
-            const goalieSlider = document.createElement('input');
-            goalieSlider.type = 'range';
-            goalieSlider.min = '0';
-            goalieSlider.max = '1';
-            goalieSlider.step = '1';
-            goalieSlider.value = player.goalie === 1 ? '1' : '0';
-            goalieSlider.className = 'goalie-slider';
-
-            // Span per visualizzare lo stato
-            const goalieStatus = document.createElement('span');
-            goalieStatus.textContent = player.goalie === 1 ? 'On' : 'Off';
-            goalieStatus.className = 'goalie-status';
-
-            goalieSlider.addEventListener('input', (event) => {
-                player.goalie = event.target.value === '1' ? 1 : 0;
-                goalieStatus.textContent = player.goalie === 1 ? 'On' : 'Off';
+            const goalieSlider = document.createElement('label');
+            goalieSlider.className = 'switch';
+    
+            const goalieInput = document.createElement('input');
+            goalieInput.type = 'checkbox';
+            goalieInput.id = `goalieSwitch-${player.name}`;
+            goalieInput.checked = player.goalie === 1;
+            goalieInput.className = 'slider';
+    
+            const goalieSpan = document.createElement('span');
+            goalieSpan.className = 'slider';
+    
+            goalieSlider.appendChild(goalieInput);
+            goalieSlider.appendChild(goalieSpan);
+    
+            goalieInput.addEventListener('change', (event) => {
+                player.goalie = event.target.checked ? 1 : 0;
                 localStorage.setItem('players', JSON.stringify(players));
             });
-
+    
             // Aggiungi tutto al container del portiere (goalie)
             goalieContainer.appendChild(goalieLabel);
             goalieContainer.appendChild(goalieSlider);
-            goalieContainer.appendChild(goalieStatus);
+    
+            // Creazione del listItem e aggiunta alla lista principale
+            const listItem = document.createElement('li');
+            listItem.textContent = player.name;
+            listItem.appendChild(presenceContainer);
             listItem.appendChild(goalieContainer);
-                
-            // Aggiungi listItem alla lista principale
             presenceList.appendChild(listItem);
         });
     }
     
-
     loadPlayers();
 
     // Aggiungi l'event listener per il click sul pulsante "Generate Teams"
