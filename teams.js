@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let players = [];
 
     function loadPlayers() {
-        fetch('players_example.xlsx')
+        fetch('players_example_v2.xlsx')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
